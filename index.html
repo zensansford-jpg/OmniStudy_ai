@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal AI</title>
+    
+    <!-- Tailwind CSS สำหรับจัด UI และ Responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ตั้งค่าพื้นฐานและ Scrollbar ให้ดูล้ำๆ */
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- ========================================== -->
+    <!-- HEADER (แถบด้านบน) -->
+    <!-- ========================================== -->
+    <header class="bg-slate-900 border-b border-cyan-800 p-4 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                <i class="fa-solid fa-microchip"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-wider text-cyan-300">PERSONAL <span class="text-white">AI</span></h1>
+        </div>
+        
+        <!-- ระบบผู้ใช้ & การล็อกอิน -->
+        <div class="flex items-center gap-4">
+            <div id="user-info" class="hidden flex items-center gap-3">
+                <span id="user-name" class="text-sm text-slate-300"></span>
+                <img id="user-pic" src="" alt="Profile" class="w-8 h-8 rounded-full border-2 border-cyan-500">
+                <button onclick="window.logout()" class="text-xs bg-rose-500/20 text-rose-400 px-3 py-1 rounded hover:bg-rose-500/40">ออกจากระบบ</button>
+            </div>
+            <button id="login-btn" onclick="window.loginWithGoogle()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-brands fa-google"></i> ล็อกอิน
+            </button>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT (รองรับมือถือ: เรียงลงมา, คอมฯ: ซ้าย-ขวา) -->
+    <!-- ========================================== -->
+    <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+        
+        <!-- SIDEBAR (เมนู) -->
+        <aside class="w-full md:w-64 bg-slate-800/50 border-r border-slate-700 p-4 flex flex-col gap-2 overflow-y-auto shrink-0">
+            <p class="text-xs text-slate-400 font-bold mb-2 uppercase">โหมดการทำงาน</p>
+            <button onclick="switchTab('chat')" id="tab-chat" class="tab-btn w-full text-left p-3 rounded-lg bg-cyan-600/30 text-cyan-300 border border-cyan-500/50 transition">
+                <i class="fa-solid fa-comment-dots w-6"></i> แชทผู้ช่วย AI
+            </button>
+            <button onclick="switchTab('upload')" id="tab-upload" class="tab-btn w-full text-left p-3 rounded-lg text-slate-300 hover:bg-slate-700 transition">
+                <i class="fa-solid fa-cloud-arrow-up w-6"></i> คลังเก็บไฟล์
+            </button>
+            <p class="text-xs text-slate-400 font-bold mt-4 mb-2 uppercase">ห้องแล็บจำลอง</p>
+            <button onclick="switchTab('wave')" id="tab-wave" class="tab-btn w-full text-left p-3 rounded-lg text-slate-300 hover:bg-slate-700 transition">
+                <i class="fa-solid fa-water w-6"></i> คลื่นฟิสิกส์
+            </button>
+            <button onclick="switchTab('math')" id="tab-math" class="tab-btn w-full text-left p-3 rounded-lg text-slate-300 hover:bg-slate-700 transition">
+                <i class="fa-solid fa-chart-line w-6"></i> กราฟสมการ
+            </button>
+        </aside>
+
+        <!-- WORKSPACE (พื้นที่แสดงผลหลัก) -->
+        <main class="flex-1 bg-slate-900 relative overflow-y-auto p-4 md:p-6">
+            
+            <!-- 1. แชทผู้ช่วย AI -->
+            <section id="sec-chat" class="tab-content h-full flex flex-col">
+                <div class="bg-slate-800 rounded-t-xl p-4 border-b border-slate-700">
+                    <h2 class="text-lg font-bold text-cyan-400"><i class="fa-solid fa-robot"></i> ระบบผู้ช่วยส่วนตัว</h2>
+                </div>
+                <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-sm max-w-[85%]">
+                            ระบบออนไลน์แล้วครับ! วันนี้มีโปรเจกต์อะไรให้ผมช่วยวิเคราะห์หรือเขียนโค้ดไหมครับ?
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-800 rounded-b-xl flex gap-2">
+                    <input type="text" id="chat-input" onkeypress="handleChatKeyDown(event)" placeholder="พิมพ์คำสั่งที่นี่..." class="flex-1 bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-500 text-sm">
+                    <button onclick="sendChatMessage()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg transition">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 2. อัปโหลดไฟล์ (Firebase) -->
+            <section id="sec-upload" class="tab-content hidden h-full">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400">อัปโหลดและจัดเก็บไฟล์</h2>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 text-center">
+                    <i class="fa-solid fa-cloud-arrow-up text-5xl text-cyan-600 mb-4"></i>
+                    <p class="text-slate-300 mb-4">อัปโหลดเอกสารเพื่อใช้ในโปรเจกต์และให้ AI ช่วยวิเคราะห์</p>
+                    
+                    <label class="cursor-pointer bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition inline-block">
+                        เลือกไฟล์
+                        <input type="file" id="file-upload" class="hidden" onchange="window.handleRealFileUpload(event)">
+                    </label>
+                    
+                    <div id="upload-status" class="mt-4 text-sm text-cyan-300 hidden">
+                        กำลังดำเนินการ... <span id="upload-filename" class="font-bold"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. คลื่นฟิสิกส์ -->
+            <section id="sec-wave" class="tab-content hidden h-full flex flex-col">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400">จำลองคลื่นฟิสิกส์</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">ความถี่ (f)</label>
+                        <input type="range" id="slider-f" min="0.1" max="5" step="0.1" value="1" class="w-full" oninput="updateWaveParams()">
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">ความยาวคลื่น (λ)</label>
+                        <input type="range" id="slider-lambda" min="10" max="100" step="1" value="50" class="w-full" oninput="updateWaveParams()">
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">แอมพลิจูด (A)</label>
+                        <input type="range" id="slider-amp" min="10" max="100" step="1" value="50" class="w-full" oninput="updateWaveParams()">
+                    </div>
+                </div>
+                <div class="flex-1 bg-black rounded-xl border border-slate-700 relative overflow-hidden">
+                    <canvas id="waveCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </section>
+
+            <!-- 4. กราฟสมการ -->
+            <section id="sec-math" class="tab-content hidden h-full flex flex-col">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400">สมการพาราโบลา y = ax² + bx + c</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">ค่า a: <span id="val-a">1</span></label>
+                        <input type="range" id="slider-a" min="-5" max="5" step="0.5" value="1" class="w-full" oninput="updateMathParams()">
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">ค่า b: <span id="val-b">0</span></label>
+                        <input type="range" id="slider-b" min="-10" max="10" step="1" value="0" class="w-full" oninput="updateMathParams()">
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-xl">
+                        <label class="block text-sm text-slate-400 mb-2">ค่า c: <span id="val-c">0</span></label>
+                        <input type="range" id="slider-c" min="-10" max="10" step="1" value="0" class="w-full" oninput="updateMathParams()">
+                    </div>
+                </div>
+                <div class="flex-1 bg-black rounded-xl border border-slate-700 relative overflow-hidden">
+                    <canvas id="mathCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- สคริปต์การทำงาน (UI & Firebase) -->
+    <!-- ========================================== -->
+    
+    <!-- 1. สคริปต์จัดการ UI และแอนิเมชัน (Vanilla JS) -->
+    <script>
+        // ระบบสลับแท็บเมนู
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('sec-' + tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-cyan-600/30', 'text-cyan-300', 'border-cyan-500/50');
+                el.classList.add('text-slate-300', 'hover:bg-slate-700');
+            });
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-700');
+            activeBtn.classList.add('bg-cyan-600/30', 'text-cyan-300', 'border-cyan-500/50');
+
+            if(tabId === 'wave') updateWaveParams();
+            if(tabId === 'math') updateMathParams();
+        }
+
+        // ระบบแชทพื้นฐาน
+        function handleChatKeyDown(e) { if(e.key === 'Enter') sendChatMessage(); }
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `
+                <div class="flex items-start justify-end gap-3">
+                    <div class="p-3 rounded-2xl bg-cyan-900 border border-cyan-700 text-cyan-100 text-sm max-w-[85%]">${text}</div>
+                </div>`;
+            input.value = '';
+            
+            setTimeout(() => {
+                chatBox.innerHTML += `
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="p-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-sm max-w-[85%]">รับทราบครับ! กำลังประมวลผลคำสั่ง "${text}"...</div>
+                    </div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 800);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // แอนิเมชันคลื่น
+        let waveOffset = 0;
+        let waveAnimId;
+        function updateWaveParams() {
+            const canvas = document.getElementById('waveCanvas');
+            if(!canvas || document.getElementById('sec-wave').classList.contains('hidden')) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            const f = parseFloat(document.getElementById('slider-f').value);
+            const lambda = parseFloat(document.getElementById('slider-lambda').value);
+            const amp = parseFloat(document.getElementById('slider-amp').value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 3;
+            waveOffset -= (f * 2);
+
+            for(let x = 0; x < canvas.width; x++) {
+                const y = canvas.height/2 + Math.sin((x + waveOffset) / lambda) * amp;
+                if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            cancelAnimationFrame(waveAnimId);
+            waveAnimId = requestAnimationFrame(updateWaveParams);
+        }
+
+        // แอนิเมชันกราฟคณิตศาสตร์
+        function updateMathParams() {
+            const canvas = document.getElementById('mathCanvas');
+            if(!canvas || document.getElementById('sec-math').classList.contains('hidden')) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            const a = parseFloat(document.getElementById('slider-a').value);
+            const b = parseFloat(document.getElementById('slider-b').value);
+            const c = parseFloat(document.getElementById('slider-c').value);
+            
+            document.getElementById('val-a').innerText = a;
+            document.getElementById('val-b').innerText = b;
+            document.getElementById('val-c').innerText = c;
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const scale = 20;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // ตีเส้น Grid
+            ctx.strokeStyle = '#334155';
+            ctx.beginPath();
+            ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+            ctx.stroke();
+
+            // วาดกราฟ
+            ctx.beginPath();
+            ctx.strokeStyle = '#fb7185';
+            ctx.lineWidth = 2;
+            for(let px = 0; px < canvas.width; px++) {
+                const x = (px - cx) / scale;
+                const y = (a * x * x) + (b * x) + c;
+                const py = cy - (y * scale);
+                if(px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+        
+        // รองรับการปรับขนาดหน้าจอ
+        window.addEventListener('resize', () => {
+            updateWaveParams();
+            updateMathParams();
+        });
+    </script>
+
+    <!-- 2. สคริปต์ Firebase (Module) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        // ⚠️ นำ Config จาก Firebase ของคุณมาใส่ตรงนี้
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:1234:web:abcd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+
+        // แนบฟังก์ชันกับ window object เพื่อให้ปุ่มใน HTML เรียกใช้ได้
+        window.loginWithGoogle = () => {
+            signInWithPopup(auth, provider).catch(error => alert("ล็อกอินล้มเหลว: " + error.message));
+        };
+
+        window.logout = () => {
+            signOut(auth).catch(error => console.error(error));
+        };
+
+        window.handleRealFileUpload = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!auth.currentUser) {
+                alert("กรุณาล็อกอินก่อนอัปโหลดไฟล์ครับ!");
+                event.target.value = ''; // รีเซ็ต input
+                return;
+            }
+
+            const statusDiv = document.getElementById('upload-status');
+            const filenameSpan = document.getElementById('upload-filename');
+            
+            statusDiv.classList.remove('hidden');
+            filenameSpan.innerText = file.name;
+            statusDiv.className = "mt-4 text-sm text-yellow-400"; // เปลี่ยนสีเป็นสีเหลืองตอนกำลังโหลด
+
+            try {
+                const storageRef = ref(storage, `uploads/${auth.currentUser.uid}/${file.name}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                
+                statusDiv.className = "mt-4 text-sm text-emerald-400"; // สำเร็จเป็นสีเขียว
+                statusDiv.innerHTML = `อัปโหลดสำเร็จ: <a href="${url}" target="_blank" class="underline hover:text-emerald-300">${file.name}</a>`;
+                
+                // แจ้งเตือน AI ในแชท
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML += `
+                    <div class="flex items-start gap-3 mt-4">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-robot"></i></div>
+                        <div class="p-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-sm max-w-[85%]">ได้รับไฟล์ <b>${file.name}</b> เข้าสู่ระบบเรียบร้อยแล้วครับ!</div>
+                    </div>`;
+            } catch (error) {
+                statusDiv.className = "mt-4 text-sm text-rose-400";
+                statusDiv.innerText = "เกิดข้อผิดพลาด: " + error.message;
+            }
+        };
+
+        // ตรวจสอบสถานะการล็อกอิน
+        onAuthStateChanged(auth, (user) => {
+            const loginBtn = document.getElementById('login-btn');
+            const userInfo = document.getElementById('user-info');
+            const userName = document.getElementById('user-name');
+            const userPic = document.getElementById('user-pic');
+
+            if (user) {
+                loginBtn.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userName.innerText = user.displayName;
+                userPic.src = user.photoURL;
+            } else {
+                loginBtn.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
